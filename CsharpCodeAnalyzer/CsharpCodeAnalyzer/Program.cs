@@ -15,8 +15,8 @@ namespace CsharpCodeAnalyzer
         static void Main(string[] args)
         {
             string rootDir;
-            if (args.Length > 1) rootDir = args[1];
-            else rootDir = @"..\..\..\TestSample";
+            if (args.Length > 0) rootDir = args[0];
+            else rootDir = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
             var files = Directory.GetFiles(rootDir, "*.cs", SearchOption.AllDirectories);
             var project = CsFileParser.ParseFilesToProject(files);
 
