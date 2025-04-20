@@ -10,10 +10,9 @@ namespace CsharpCodeAnalyzer
 {
     class MarkdownManager
     {
-        public static void OutputToMarkdown(ParsedProject project)
+        public static void OutputToMarkdown(ParsedProject project, string outputDirectory = "output")
         {
             var namespaceList = new StringBuilder();
-            var outputDirectory = "output"; // 出力先のディレクトリ（任意で変更）
 
             // 出力先ディレクトリがあれば、.mdファイルを削除
             if (Directory.Exists(outputDirectory))
