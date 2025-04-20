@@ -41,10 +41,16 @@ namespace CsharpCodeAnalyzer
                     .OrderBy(t => t.Name)
                     .ToList();
 
+                var interfaces = ns.Types
+                    .Where(t => t.Kind == "interface")
+                    .OrderBy(t => t.Name)
+                    .ToList();
+
                 var enums = ns.Types
                     .Where(t => t.Kind == "enum")
                     .OrderBy(t => t.Name)
                     .ToList();
+
                 var structs = ns.Types
                     .Where(t => t.Kind == "struct")
                     .OrderBy(t => t.Name)
@@ -56,6 +62,18 @@ namespace CsharpCodeAnalyzer
                 {
                     namespaceMarkdownBuilder.AppendLine("## Classes");
                     foreach (var type in classOrStructs)
+                    {
+                        WriteTypeMarkdown(type, ns.Name, outputDirectory);
+                        namespaceMarkdownBuilder.AppendLine($"- [{type.Name}](./{ns.Name}_{type.Name}.md)");
+                    }
+                    namespaceMarkdownBuilder.AppendLine();
+                }
+
+                // Intarfaceの見出し
+                if (interfaces.Any())
+                {
+                    namespaceMarkdownBuilder.AppendLine("## Interfaces");
+                    foreach (var type in interfaces)
                     {
                         WriteTypeMarkdown(type, ns.Name, outputDirectory);
                         namespaceMarkdownBuilder.AppendLine($"- [{type.Name}](./{ns.Name}_{type.Name}.md)");
@@ -86,7 +104,6 @@ namespace CsharpCodeAnalyzer
                     }
                     namespaceMarkdownBuilder.AppendLine();
                 }
-
 
                 // 名前空間ごとのマークダウンファイルを保存
                 var namespaceFilePath = Path.Combine(outputDirectory, $"{ns.Name}.md");

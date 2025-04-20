@@ -157,7 +157,7 @@ namespace CsharpCodeAnalyzer
 
         private static bool TryParseTypeDeclaration(string line, List<string> xmlCommentBuffer, out TypeModel type, ref bool isEnum)
         {
-            var regex = new Regex(@"^\s*(public|protected|internal|private|static|readonly|virtual|abstract|\s)*\s*(partial\s+)?(class|struct|enum)\s+([a-zA-Z0-9_]+)");
+            var regex = new Regex(@"^\s*(public|protected|internal|private|static|readonly|virtual|abstract|\s)*\s*(partial\s+)?(class|struct|enum|interface)\s+([a-zA-Z0-9_]+)");
             var match = regex.Match(line);
 
             if (match.Success)
@@ -209,18 +209,19 @@ namespace CsharpCodeAnalyzer
 
         private static void TryParseMember(string line, TypeModel currentType, List<string> xmlCommentBuffer)
         {
-            //var regex = new Regex(@"^\s*(public|protected|internal|private)\s+([a-zA-Z0-9_<>,\[\]\s]+)\s+([a-zA-Z0-9_]+)\s*(\(|\{|;)?");
-            var regex = new Regex(@"^\s*(public|protected|internal|private)\s+([a-zA-Z0-9_<>,\[\]\s]+)\s+([a-zA-Z0-9_]+)\s*(\(([^)]*)\)|\{|;)");
-            var argsRegex = new Regex(@"\s*\(([^)]*)\)");
+            var fieldRegex = new Regex(@"^\s*(?:(public|protected|internal|private)\s+)?(?:static\s+|readonly\s+|const\s+)?([a-zA-Z0-9_<>\[\],\s]+)\s+([a-zA-Z0-9_]+)\s*(=.+)?;");
+            var methodRegex = new Regex(@"^\s*(?:(public|protected|internal|private)\s+)?([a-zA-Z0-9_<>,\[\]\s]+)\s+([a-zA-Z0-9_]+)\s*\(([^)]*)\)\s*;?");
 
-            var match = regex.Match(line);
-            if (match.Success)
+            var methodMatch = methodRegex.Match(line);
+            var fieldMatch = fieldRegex.Match(line);
+            if (methodMatch.Success | fieldMatch.Success)
             {
-                var access = match.Groups[1].Value;
+                var defAccess = (currentType.Kind == "interface") ? "public" : "private";
+                var isMethod = methodMatch.Success;
+                var match = isMethod ? methodMatch : fieldMatch;
+                var access = match.Groups[1].Success ? match.Groups[1].Value : defAccess;
                 var type = match.Groups[2].Value.Trim();
                 var name = match.Groups[3].Value.Trim() + match.Groups[4].Value;
-                //var isMethod = match.Groups[4].Value == "(";
-                var isMethod = argsRegex.Match(match.Groups[4].Value).Success;
 
                 currentType.Members.Add(new MemberModel
                 {

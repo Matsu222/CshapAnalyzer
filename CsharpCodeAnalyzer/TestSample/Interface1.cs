@@ -16,7 +16,7 @@ namespace TestSample
         /// </summary>
         /// <returns>結果</returns>
         bool Test1();
-        
+
         /// <summary>
         /// テスト2
         /// </summary>
