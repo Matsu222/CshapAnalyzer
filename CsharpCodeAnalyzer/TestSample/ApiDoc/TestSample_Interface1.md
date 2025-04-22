@@ -6,6 +6,12 @@
   - [**double Test3(double a, double b)**](#double-test3double-a-double-b)
 
 
+---
+
+---
+
+[← Back to TestSample](./TestSample.md)
+
 # public interface Interface1
 >テスト用の公開インターフェース1
 
@@ -24,4 +30,10 @@
 >- **b**: 引数2
 
 >**Returns:** 結果
+---
+
+---
+
+[← Back to TestSample](./TestSample.md)
+
 

@@ -6,6 +6,12 @@
 - [Structs](#structs)
 
 
+---
+
+---
+
+[← Back to Namespaces](./Namespaces.md)
+
 # Namespace: TestSample
 
 ## Classes
@@ -20,5 +26,11 @@
 
 ## Structs
 - [TestStr](./TestSample_TestStr.md)
+
+---
+
+---
+
+[← Back to Namespaces](./Namespaces.md)
 
 

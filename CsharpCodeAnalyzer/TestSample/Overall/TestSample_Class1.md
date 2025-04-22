@@ -11,6 +11,12 @@
   - [**double Method3(string s)**](#double-method3string-s)
 
 
+---
+
+---
+
+[← Back to TestSample](./TestSample.md)
+
 # public class Class1
 >テスト用クラス1
 
@@ -41,4 +47,10 @@
 >- **s**: 引数
 
 >**Returns:** 戻り値
+---
+
+---
+
+[← Back to TestSample](./TestSample.md)
+
 

@@ -3,9 +3,21 @@
 - [Classes](#classes)
 
 
+---
+
+---
+
+[← Back to Namespaces](./Namespaces.md)
+
 # Namespace: TestSampleOther
 
 ## Classes
 - [Class3](./TestSampleOther_Class3.md)
+
+---
+
+---
+
+[← Back to Namespaces](./Namespaces.md)
 
 

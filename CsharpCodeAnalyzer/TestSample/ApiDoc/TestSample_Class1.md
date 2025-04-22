@@ -8,6 +8,12 @@
   - [**string Method2()**](#string-method2)
 
 
+---
+
+---
+
+[← Back to TestSample](./TestSample.md)
+
 # public class Class1
 >テスト用クラス1
 
@@ -30,4 +36,10 @@
 
 
 >**Returns:** 戻り値
+---
+
+---
+
+[← Back to TestSample](./TestSample.md)
+
 

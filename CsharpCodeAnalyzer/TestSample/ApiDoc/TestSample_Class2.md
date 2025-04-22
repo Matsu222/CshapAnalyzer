@@ -5,6 +5,12 @@
   - [**void Method2(double a, out string s)**](#void-method2double-a-out-string-s)
 
 
+---
+
+---
+
+[← Back to TestSample](./TestSample.md)
+
 # public class Class2
 >テスト用クラス2
 
@@ -16,4 +22,10 @@
 
 >- **a**: 引数1
 >- **s**: out引数
+---
+
+---
+
+[← Back to TestSample](./TestSample.md)
+
 

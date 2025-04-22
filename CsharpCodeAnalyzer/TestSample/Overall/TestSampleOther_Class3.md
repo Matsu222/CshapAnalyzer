@@ -12,6 +12,12 @@
   - [**void Method6(int a, ref string s)**](#void-method6int-a-ref-string-s)
 
 
+---
+
+---
+
+[← Back to TestSampleOther](./TestSampleOther.md)
+
 # public class Class3
 >テスト用クラス3
 
@@ -44,4 +50,10 @@
 
 >- **a**: 引数1
 >- **s**: ref引数
+---
+
+---
+
+[← Back to TestSampleOther](./TestSampleOther.md)
+
 
