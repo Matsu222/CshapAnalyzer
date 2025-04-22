@@ -3,7 +3,7 @@
 - [Members](#members)
 
 
-#   enum Test
+# public enum Test
 >Test用enum
 
 ## Members

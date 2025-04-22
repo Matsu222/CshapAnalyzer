@@ -5,7 +5,7 @@
   - [**string s**](#string-s)
 
 
-#   struct TestStr
+# public struct TestStr
 >テスト用構造体
 
 ## Fields

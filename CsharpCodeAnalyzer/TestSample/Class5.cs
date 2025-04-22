@@ -5,36 +5,36 @@ using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TestSample
+namespace TestSampleOther
 {
     /// <summary>
-    /// テスト用クラス2
+    /// テスト用クラス5
     /// </summary>
-    public static class Class2
+    internal partial class Class5
     {
         /// <summary>
-        /// 公開メソッド1
+        /// 公開メソッド4
         /// </summary>
-        static public void Method1()
+        public void Method4()
         {
         }
 
         /// <summary>
-        /// 公開メソッド2
+        /// 公開メソッド5
         /// </summary>
         /// <param name="a">引数1</param>
         /// <param name="s">out引数</param>
-        static public void Method2(double a, out string s)
+        public void Method5(double a, out string s)
         {
             s = "test";
         }
 
         /// <summary>
-        /// 非公開メソッド3
+        /// 非公開メソッド6
         /// </summary>
         /// <param name="a">引数1</param>
         /// <param name="s">ref引数</param>
-        static private void Method3(int a, ref string s)
+        private void Method6(int a, ref string s)
         {
 
         }

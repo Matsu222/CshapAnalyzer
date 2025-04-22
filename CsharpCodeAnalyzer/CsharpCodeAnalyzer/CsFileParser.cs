@@ -157,15 +157,24 @@ namespace CsharpCodeAnalyzer
 
         private static bool TryParseTypeDeclaration(string line, List<string> xmlCommentBuffer, out TypeModel type, ref bool isEnum)
         {
-            var regex = new Regex(@"^\s*(public|protected|internal|private|static|readonly|virtual|abstract|\s)*\s*(partial\s+)?(class|struct|enum|interface)\s+([a-zA-Z0-9_]+)");
+            var regex = BuildTypeRegex();
             var match = regex.Match(line);
 
             if (match.Success)
             {
-                var access = string.IsNullOrEmpty(match.Groups[1].Value) ? "internal" : match.Groups[1].Value;
-                var kind = match.Groups[3].Value;
-                var name = match.Groups[4].Value;
+                // アクセス修飾子（public, protected, internal, private）がない場合はデフォルトで 'internal'
+                var access = string.IsNullOrEmpty(match.Groups[2].Value) ? "internal" : match.Groups[2].Value;
 
+                // 修飾子（static, readonly など）を格納
+                var modifiers = match.Groups[3].Value.Trim();
+
+                // クラスの種類（class, struct, enum, interface）
+                var kind = match.Groups[6].Value;
+
+                // クラス名
+                var name = match.Groups[7].Value;
+
+                // TypeModel の作成
                 type = new TypeModel
                 {
                     Name = name,
@@ -173,11 +182,12 @@ namespace CsharpCodeAnalyzer
                     Accessibility = access,
                     Members = new List<MemberModel>(),
                     XmlComment = string.Join(" ", xmlCommentBuffer),
-                    IsPartial = line.Contains("partial")
+                    IsPartial = match.Groups[5].Success  // 'partial' が含まれていれば true
                 };
 
                 xmlCommentBuffer.Clear();
                 isEnum = kind == "enum";
+
                 return true;
             }
 
@@ -209,20 +219,41 @@ namespace CsharpCodeAnalyzer
 
         private static void TryParseMember(string line, TypeModel currentType, List<string> xmlCommentBuffer)
         {
-            var fieldRegex = new Regex(@"^\s*(?:(public|protected|internal|private)\s+)?(?:static\s+|readonly\s+|const\s+)?([a-zA-Z0-9_<>\[\],\s]+)\s+([a-zA-Z0-9_]+)\s*(=.+)?;");
-            var methodRegex = new Regex(@"^\s*(?:(public|protected|internal|private)\s+)?([a-zA-Z0-9_<>,\[\]\s]+)\s+([a-zA-Z0-9_]+)\s*\(([^)]*)\)\s*;?");
+            var methodRegex = BuildMethodRegex();
+            var fieldRegex = BuildFieldRegex();
 
             var methodMatch = methodRegex.Match(line);
             var fieldMatch = fieldRegex.Match(line);
-            if (methodMatch.Success | fieldMatch.Success)
-            {
-                var defAccess = (currentType.Kind == "interface") ? "public" : "private";
-                var isMethod = methodMatch.Success;
-                var match = isMethod ? methodMatch : fieldMatch;
-                var access = match.Groups[1].Success ? match.Groups[1].Value : defAccess;
-                var type = match.Groups[2].Value.Trim();
-                var name = match.Groups[3].Value.Trim() + match.Groups[4].Value;
 
+            if (methodMatch.Success || fieldMatch.Success)
+            {
+                bool isMethod = methodMatch.Success;
+                var match = isMethod ? methodMatch : fieldMatch;
+
+                // デフォルトのアクセス修飾子（interface なら public、それ以外は private）
+                string defAccess = currentType.Kind == "interface" ? "public" : "private";
+
+                // 修飾子の抽出
+                var modifiers = match.Groups["modifier"]
+                    .Captures
+                    .Cast<Capture>()
+                    .Select(c => c.Value.Trim())
+                    .ToList();
+
+                var accessModifiers = new[] { "public", "private", "protected", "internal" };
+
+                // アクセス修飾子の判定（protected internal の対応も含む）
+                string access = defAccess;
+                if (modifiers.Contains("protected") && modifiers.Contains("internal")) access = "protected internal";
+                else access = modifiers.FirstOrDefault(m => accessModifiers.Contains(m)) ?? defAccess;
+
+                // 型、名前、引数を抽出
+                string type = match.Groups["type"].Value.Trim();
+                string methodName = match.Groups["name"].Value.Trim();
+                string parameterList = match.Groups["params"].Value.Trim();
+                string name = isMethod ? $"{methodName}({parameterList})" : methodName;
+
+                // MemberModel に追加
                 currentType.Members.Add(new MemberModel
                 {
                     Name = name,
@@ -236,10 +267,60 @@ namespace CsharpCodeAnalyzer
             }
         }
 
+        private static Regex BuildTypeRegex()
+        {
+            // 修飾子（アクセス修飾子 + その他修飾子）部分
+            var accessModifierPattern = @"(public|protected|internal|private)\s+";
+            var otherModifiersPattern = @"(static|readonly|sealed|virtual|abstract|async|extern)\s+";
+
+            // 'partial' 修飾子
+            var partialModifierPattern = @"(partial\s+)?";
+
+            // クラス、構造体、インターフェース、列挙型のキーワード
+            var typePattern = @"(class|struct|enum|interface)\s+";
+
+            // クラス名
+            var namePattern = @"([a-zA-Z0-9_]+)";
+
+            // 完全な正規表現を組み立てる
+            var regexPattern = $@"^\s*({accessModifierPattern})?({otherModifiersPattern})*\s*{partialModifierPattern}{typePattern}{namePattern}";
+
+            return new Regex(regexPattern);
+        }
+
+
+        private static Regex BuildMethodRegex()
+        {
+            var modifiersPattern = @"(?:(?<modifier>public|protected|internal|private|static|sealed|virtual|override|abstract|async|extern)\s+)*";
+            var typePattern = @"(?<type>[a-zA-Z0-9_<>,\[\]\s]+)\s+";
+            var methodNamePattern = @"(?<name>[a-zA-Z0-9_]+)\s*";
+            var parameterPattern = @"\((?<params>[^)]*)\)\s*;?";
+            var whitespace = @"\s*";
+
+            var methodPattern = $"^{whitespace}{modifiersPattern}{typePattern}{methodNamePattern}{parameterPattern}";
+            return new Regex(methodPattern);
+        }
+
+        private static Regex BuildFieldRegex()
+        {
+            var modifiersPattern = @"(?:(?<modifier>public|protected|internal|private|static|sealed|virtual|override|abstract|async|extern|readonly|const)\s+)*";
+            var typePattern = @"(?<type>[a-zA-Z0-9_<>,\[\]\s]+)\s+";
+            var fieldNamePattern = @"(?<name>[a-zA-Z0-9_]+)";
+            var initializerPattern = @"(?:\s*=\s*[^;]+)?";
+            var whitespace = @"\s*";
+
+            var fieldPattern = $"^{whitespace}{modifiersPattern}{typePattern}{fieldNamePattern}{initializerPattern};";
+            return new Regex(fieldPattern);
+        }
+
+
         public static void RemovePrivateMembersAndComments(ParsedProject project)
         {
             foreach (var ns in project.Namespaces.Values)
             {
+                ns.Types = ns.Types
+                    .Where(m => m.Accessibility == "public" || m.Accessibility == "protected")
+                    .ToList();
                 foreach (var type in ns.Types)
                 {
                     type.Members = type.Members

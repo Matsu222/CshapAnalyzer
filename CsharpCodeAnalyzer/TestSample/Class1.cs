@@ -22,7 +22,7 @@ namespace TestSample
         /// <param name="a">引数1</param>
         /// <param name="b">引数2</param>
         /// <returns>戻り値</returns>
-        public bool Method1(double a, double b)
+        static public bool Method1(double a, double b)
         {
             return false;
         }
@@ -31,7 +31,7 @@ namespace TestSample
         /// 公開メソッド2
         /// </summary>
         /// <returns>戻り値</returns>
-        public string Method2()
+        public static string Method2()
         {
             return "test";
         }

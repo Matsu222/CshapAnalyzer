@@ -20,8 +20,9 @@ namespace CsharpCodeAnalyzer
             var files = Directory.GetFiles(rootDir, "*.cs", SearchOption.AllDirectories);
             var project = CsFileParser.ParseFilesToProject(files);
 
+            MarkdownManager.OutputToMarkdown(project, rootDir + @"\Overall");
             CsFileParser.RemovePrivateMembersAndComments(project);
-            MarkdownManager.OutputToMarkdown(project, rootDir + @"\output");
+            MarkdownManager.OutputToMarkdown(project, rootDir + @"\ApiDoc");
         }
     }
 }
