@@ -162,17 +162,19 @@ namespace CsharpCodeAnalyzer
 
             if (match.Success)
             {
-                // アクセス修飾子（public, protected, internal, private）がない場合はデフォルトで 'internal'
-                var access = string.IsNullOrEmpty(match.Groups[2].Value) ? "internal" : match.Groups[2].Value;
+                var modifiers = match.Groups["modifier"].Captures.Cast<Capture>().Select(c => c.Value.Trim()).ToList();
+                var accessModifiers = new[] { "public", "private", "protected", "internal" };
 
-                // 修飾子（static, readonly など）を格納
-                var modifiers = match.Groups[3].Value.Trim();
+                // アクセス修飾子（public, protected, internal, private）がない場合はデフォルトで 'internal'
+                string access = "internal";
+                if (modifiers.Contains("protected") && modifiers.Contains("internal")) access = "protected internal";
+                else access = modifiers.FirstOrDefault(m => accessModifiers.Contains(m));
 
                 // クラスの種類（class, struct, enum, interface）
-                var kind = match.Groups[6].Value;
+                var kind = match.Groups[1].Value;
 
                 // クラス名
-                var name = match.Groups[7].Value;
+                var name = match.Groups[2].Value;
 
                 // TypeModel の作成
                 type = new TypeModel
@@ -234,11 +236,7 @@ namespace CsharpCodeAnalyzer
                 string defAccess = currentType.Kind == "interface" ? "public" : "private";
 
                 // 修飾子の抽出
-                var modifiers = match.Groups["modifier"]
-                    .Captures
-                    .Cast<Capture>()
-                    .Select(c => c.Value.Trim())
-                    .ToList();
+                var modifiers = match.Groups["modifier"].Captures.Cast<Capture>().Select(c => c.Value.Trim()).ToList();
 
                 var accessModifiers = new[] { "public", "private", "protected", "internal" };
 
@@ -269,22 +267,14 @@ namespace CsharpCodeAnalyzer
 
         private static Regex BuildTypeRegex()
         {
-            // 修飾子（アクセス修飾子 + その他修飾子）部分
-            var accessModifierPattern = @"(public|protected|internal|private)\s+";
-            var otherModifiersPattern = @"(static|readonly|sealed|virtual|abstract|async|extern)\s+";
-
-            // 'partial' 修飾子
-            var partialModifierPattern = @"(partial\s+)?";
-
-            // クラス、構造体、インターフェース、列挙型のキーワード
+            // 全修飾子を1つにまとめる
+            var allModifiersPattern = @"(?:(?<modifier>public|protected|internal|private|static|readonly|sealed|virtual|abstract|async|extern|partial)\s+)*";
+            // クラス、構造体、インターフェース、列挙型
             var typePattern = @"(class|struct|enum|interface)\s+";
-
-            // クラス名
+            // 名前
             var namePattern = @"([a-zA-Z0-9_]+)";
-
-            // 完全な正規表現を組み立てる
-            var regexPattern = $@"^\s*({accessModifierPattern})?({otherModifiersPattern})*\s*{partialModifierPattern}{typePattern}{namePattern}";
-
+            // 最終的な正規表現
+            var regexPattern = $@"^\s*{allModifiersPattern}{typePattern}{namePattern}";
             return new Regex(regexPattern);
         }
 

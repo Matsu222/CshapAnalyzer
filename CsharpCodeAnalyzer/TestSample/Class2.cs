@@ -10,7 +10,7 @@ namespace TestSample
     /// <summary>
     /// テスト用クラス2
     /// </summary>
-    public static class Class2
+    static public class Class2
     {
         /// <summary>
         /// 公開メソッド1

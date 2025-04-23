@@ -13,6 +13,7 @@
 
 ## Classes
 - [Class3](./TestSampleOther_Class3.md)
+- [Class3](./TestSampleOther_Class3.md)
 - [Class5](./TestSampleOther_Class5.md)
 
 ---
