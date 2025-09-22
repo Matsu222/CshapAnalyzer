@@ -66,10 +66,10 @@ namespace CsharpCodeAnalyzer
             AppendBackLink(sb, "Namespaces");
             sb.AppendLine($"# Namespace: {ns.Name}\n");
 
-            WriteTypeSection(sb, ns.Types, "class", "Classes", ns.Name, outputDirectory);
-            WriteTypeSection(sb, ns.Types, "interface", "Interfaces", ns.Name, outputDirectory);
-            WriteTypeSection(sb, ns.Types, "enum", "Enums", ns.Name, outputDirectory);
-            WriteTypeSection(sb, ns.Types, "struct", "Structs", ns.Name, outputDirectory);
+            WriteTypeSection(sb, ns.Types, TypeModel.TypeName.Class, "Classes", ns.Name, outputDirectory);
+            WriteTypeSection(sb, ns.Types, TypeModel.TypeName.Interface, "Interfaces", ns.Name, outputDirectory);
+            WriteTypeSection(sb, ns.Types, TypeModel.TypeName.Enum, "Enums", ns.Name, outputDirectory);
+            WriteTypeSection(sb, ns.Types, TypeModel.TypeName.Struct, "Structs", ns.Name, outputDirectory);
 
             AppendBackLink(sb, "Namespaces");
             return sb;
@@ -85,7 +85,7 @@ namespace CsharpCodeAnalyzer
         /// <param name="header">対象項目の見出し</param>
         /// <param name="nsName">対象とする名前空間の名称</param>
         /// <param name="outputDirectory">出力先フォルダ</param>
-        private static void WriteTypeSection(StringBuilder sb, List<TypeModel> types, string kind, string header, string nsName, string outputDirectory)
+        private static void WriteTypeSection(StringBuilder sb, List<TypeModel> types, TypeModel.TypeName kind, string header, string nsName, string outputDirectory)
         {
             var filtered = types.Where(t => t.Kind == kind).OrderBy(t => t.Name).ToList();
 
@@ -129,7 +129,7 @@ namespace CsharpCodeAnalyzer
 
             sb.AppendLine($"# {type.Accessibility} {type.Kind} {type.Name}");
             if (!string.IsNullOrEmpty(type.XmlComment)) sb.AppendLine(XmlParser.ToMarkdown(type.XmlComment) + "\n");
-            if (type.Kind == "enum") AppendEnumMembers(sb, type.Members);
+            if (type.Kind == TypeModel.TypeName.Enum) AppendEnumMembers(sb, type.Members);
             else AppendFieldsAndMethods(sb, type.Members);
 
             AppendBackLink(sb, namespaceName);
@@ -167,12 +167,12 @@ namespace CsharpCodeAnalyzer
         private static void AppendFieldsAndMethods(StringBuilder sb, List<MemberModel> members)
         {
             var fields = members
-                .Where(m => m.Kind == "field")
+                .Where(m => m.Kind == MemberModel.TypeName.Field)
                 .OrderBy(m => m.Name)
                 .ToList();
 
             var methods = members
-                .Where(m => m.Kind == "method")
+                .Where(m => m.Kind == MemberModel.TypeName.Method)
                 .OrderBy(m => m.Name)
                 .ToList();
 

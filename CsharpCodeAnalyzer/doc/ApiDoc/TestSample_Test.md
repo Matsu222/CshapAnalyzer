@@ -9,7 +9,7 @@
 
 [← Back to TestSample](./TestSample.md)
 
-# public enum Test
+# public Enum Test
 >Test用enum
 
 ## Members

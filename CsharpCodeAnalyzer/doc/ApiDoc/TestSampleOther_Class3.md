@@ -11,7 +11,7 @@
 
 [← Back to TestSampleOther](./TestSampleOther.md)
 
-# public class Class3
+# public Class Class3
 >テスト用クラス3
 
 ## Methods

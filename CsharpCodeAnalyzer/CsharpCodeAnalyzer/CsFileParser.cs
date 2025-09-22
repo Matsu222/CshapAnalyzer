@@ -170,8 +170,16 @@ namespace CsharpCodeAnalyzer
                 if (modifiers.Contains("protected") && modifiers.Contains("internal")) access = "protected internal";
                 else access = modifiers.FirstOrDefault(m => accessModifiers.Contains(m));
 
-                // クラスの種類（class, struct, enum, interface）
-                var kind = match.Groups[1].Value;
+                // 型の種類（class, struct, enum, interface）
+                TypeModel.TypeName kind;
+                switch (match.Groups[1].Value.ToLower())
+                {
+                    case "interface": kind = TypeModel.TypeName.Interface; break;
+                    case "class": kind = TypeModel.TypeName.Class; break;
+                    case "struce": kind = TypeModel.TypeName.Struct; break;
+                    case "enum": kind = TypeModel.TypeName.Enum; break;
+                    default: kind = TypeModel.TypeName.Unknown; break;
+                }
 
                 // クラス名
                 var name = match.Groups[2].Value;
@@ -188,7 +196,7 @@ namespace CsharpCodeAnalyzer
                 };
 
                 xmlCommentBuffer.Clear();
-                isEnum = kind == "enum";
+                isEnum = kind == TypeModel.TypeName.Enum;
 
                 return true;
             }
@@ -209,7 +217,7 @@ namespace CsharpCodeAnalyzer
                 currentType.Members.Add(new MemberModel
                 {
                     Name = name,
-                    Kind = "enumMember",
+                    Kind = MemberModel.TypeName.EnumMember,
                     Type = currentType.Name,
                     Accessibility = "public",
                     XmlComment = string.Join(" ", xmlCommentBuffer)
@@ -239,7 +247,7 @@ namespace CsharpCodeAnalyzer
                 var match = isMethod ? methodMatch : fieldMatch;
 
                 // デフォルトのアクセス修飾子（interface なら public、それ以外は private）
-                string defAccess = currentType.Kind == "interface" ? "public" : "private";
+                string defAccess = currentType.Kind == TypeModel.TypeName.Interface ? "public" : "private";
 
                 // 修飾子の抽出
                 var modifiers = match.Groups["modifier"].Captures.Cast<Capture>().Select(c => c.Value.Trim()).ToList();
@@ -261,7 +269,7 @@ namespace CsharpCodeAnalyzer
                 currentType.Members.Add(new MemberModel
                 {
                     Name = name,
-                    Kind = isMethod ? "method" : "field",
+                    Kind = isMethod ? MemberModel.TypeName.Method : MemberModel.TypeName.Field,
                     Type = type,
                     Accessibility = access,
                     XmlComment = string.Join(" ", xmlCommentBuffer)

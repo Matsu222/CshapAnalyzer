@@ -12,7 +12,7 @@
 
 [← Back to TestSample](./TestSample.md)
 
-# public interface Interface1
+# public Interface Interface1
 >テスト用の公開インターフェース1
 
 ## Methods

@@ -14,7 +14,7 @@
 
 [← Back to TestSample](./TestSample.md)
 
-# public class Class2
+# public Class Class2
 >テスト用クラス2
 
 ## Fields

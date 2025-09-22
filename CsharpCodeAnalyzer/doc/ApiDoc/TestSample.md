@@ -3,7 +3,6 @@
 - [Classes](#classes)
 - [Interfaces](#interfaces)
 - [Enums](#enums)
-- [Structs](#structs)
 
 
 ---
@@ -23,9 +22,6 @@
 
 ## Enums
 - [Test](./TestSample_Test.md)
-
-## Structs
-- [TestStr](./TestSample_TestStr.md)
 
 ---
 

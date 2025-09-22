@@ -14,8 +14,8 @@
 
 [← Back to TestSampleOther](./TestSampleOther.md)
 
-# internal class Class5
->テスト用クラス5
+# public Class Class3
+>テスト用クラス3
 
 ## Fields
 ### ** s**
