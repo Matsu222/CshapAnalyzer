@@ -15,14 +15,20 @@ namespace CsharpCodeAnalyzer
         static void Main(string[] args)
         {
             string rootDir;
-            if (args.Length > 0) rootDir = args[0];
+            string outputDir;
+
+            if (args.Length >= 1) rootDir = args[0];
             else rootDir = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+
+            if (args.Length >= 2) outputDir = args[1];
+            else outputDir = rootDir;
+
             var files = Directory.GetFiles(rootDir, "*.cs", SearchOption.AllDirectories);
             var project = CsFileParser.ParseFilesToProject(files);
 
-            MarkdownManager.OutputToMarkdown(project, rootDir + @"\Overall");
+            MarkdownManager.OutputToMarkdown(project, outputDir + @"\Overall");
             CsFileParser.RemovePrivateMembersAndComments(project);
-            MarkdownManager.OutputToMarkdown(project, rootDir + @"\ApiDoc");
+            MarkdownManager.OutputToMarkdown(project, outputDir + @"\ApiDoc");
         }
     }
 }

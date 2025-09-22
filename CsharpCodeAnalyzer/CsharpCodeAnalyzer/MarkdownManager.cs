@@ -9,9 +9,17 @@ using System.Xml.Linq;
 
 namespace CsharpCodeAnalyzer
 {
+    /// <summary>
+    /// マークダウンの生成用クラス
+    /// </summary>
     class MarkdownManager
     {
-        public static void OutputToMarkdown(ParsedProject project, string outputDirectory = "output")
+        /// <summary>
+        /// 対象プロジェクトのマークダウンファイルの出力
+        /// </summary>
+        /// <param name="project">対象のC#プロジェクト</param>
+        /// <param name="outputDirectory">出力先のフォルダ</param>
+        public static void OutputToMarkdown(ParsedProject project, string outputDirectory)
         {
             PrepareOutputDirectory(outputDirectory);
 
@@ -27,6 +35,10 @@ namespace CsharpCodeAnalyzer
             Console.WriteLine("Markdown files have been generated.");
         }
 
+        /// <summary>
+        /// 対象のフォルダを事前に作成、もしくはマークダウンを全削除
+        /// </summary>
+        /// <param name="outputDirectory">対象</param>
         private static void PrepareOutputDirectory(string outputDirectory)
         {
             if (Directory.Exists(outputDirectory))
@@ -42,6 +54,12 @@ namespace CsharpCodeAnalyzer
             }
         }
 
+        /// <summary>
+        /// 対象のフォルダに名前空間の情報についてマークダウンファイルを作成
+        /// </summary>
+        /// <param name="ns">対象の名前空間情報</param>
+        /// <param name="outputDirectory">出力先のフォルダ</param>
+        /// <returns></returns>
         private static StringBuilder GenerateNamespaceMarkdown(NamespaceModel ns, string outputDirectory)
         {
             var sb = new StringBuilder();
@@ -57,6 +75,16 @@ namespace CsharpCodeAnalyzer
             return sb;
         }
 
+        /// <summary>
+        /// 任意の項目を対象にして存在する項目を名前空間の情報として付与しマークダウンのリンクを作成<br/>
+        /// 同時にそれぞれの項目の説明用マークダウンを下位フォルダへ生成
+        /// </summary>
+        /// <param name="sb">名前空間の説明用マークダウン文字列</param>
+        /// <param name="types">付与する項目の種類</param>
+        /// <param name="kind"></param>
+        /// <param name="header">対象項目の見出し</param>
+        /// <param name="nsName">対象とする名前空間の名称</param>
+        /// <param name="outputDirectory">出力先フォルダ</param>
         private static void WriteTypeSection(StringBuilder sb, List<TypeModel> types, string kind, string header, string nsName, string outputDirectory)
         {
             var filtered = types.Where(t => t.Kind == kind).OrderBy(t => t.Name).ToList();
@@ -87,6 +115,12 @@ namespace CsharpCodeAnalyzer
             WriteMarkdownWithToc(path, sb);
         }
 
+        /// <summary>
+        /// 対象のフォルダに
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="namespaceName"></param>
+        /// <param name="outputDirectory"></param>
         private static void WriteTypeMarkdown(TypeModel type, string namespaceName, string outputDirectory)
         {
             var sb = new StringBuilder();
@@ -104,6 +138,11 @@ namespace CsharpCodeAnalyzer
             WriteMarkdownWithToc(filePath, sb);
         }
 
+        /// <summary>
+        /// 追加するメンバーリストからenumを抽出して順番にマークダウン文字列として追加
+        /// </summary>
+        /// <param name="sb">追加対象の文字列</param>
+        /// <param name="members">追加するメンバーリスト</param>
         private static void AppendEnumMembers(StringBuilder sb, List<MemberModel> members)
         {
             var enumMembers = members.OrderBy(m => m.Name).ToList();
@@ -120,6 +159,11 @@ namespace CsharpCodeAnalyzer
             }
         }
 
+        /// <summary>
+        /// 追加するメンバーリストからフィールド変数とメソッドを抽出して順番にマークダウン文字列として追加
+        /// </summary>
+        /// <param name="sb">追加対象の文字列</param>
+        /// <param name="members">追加するメンバーリスト</param>
         private static void AppendFieldsAndMethods(StringBuilder sb, List<MemberModel> members)
         {
             var fields = members
@@ -156,6 +200,12 @@ namespace CsharpCodeAnalyzer
             }
         }
 
+        /// <summary>
+        /// 任意のファイルに戻るようなマークダウン用リンクを末尾に付与<br/>
+        /// 対象のファイルは同じフォルダにあることが前提です
+        /// </summary>
+        /// <param name="sb">付与対象の文字列</param>
+        /// <param name="BackFilename">付与対象のファイル文字列</param>
         private static void AppendBackLink(StringBuilder sb, string BackFilename)
         {
             sb.AppendLine($"---\n");
@@ -163,6 +213,11 @@ namespace CsharpCodeAnalyzer
             sb.AppendLine($"[← Back to {BackFilename}](./{BackFilename}.md)\n");
         }
 
+        /// <summary>
+        /// 対象のファイルに保存対象のマークダウン文字列の目次を付与して保存
+        /// </summary>
+        /// <param name="filePath">保存先ファイルパス</param>
+        /// <param name="originalContent">保存対象のマークダウン文字列</param>
         private static void WriteMarkdownWithToc(string filePath, StringBuilder originalContent)
         {
             var lines = originalContent.ToString().Split('\n').ToList();
@@ -187,7 +242,11 @@ namespace CsharpCodeAnalyzer
             File.WriteAllText(filePath, finalBuilder.ToString());
         }
 
-
+        /// <summary>
+        /// マークダウンの全文字列から目次を生成
+        /// </summary>
+        /// <param name="markdownLines">マークダウンの文字列</param>
+        /// <returns>目次用文字列</returns>
         private static string GenerateTocFromLines(IEnumerable<string> markdownLines)
         {
             var toc = new StringBuilder();
@@ -213,6 +272,11 @@ namespace CsharpCodeAnalyzer
             return toc.ToString();
         }
 
+        /// <summary>
+        /// マークダウンのリンクを作成
+        /// </summary>
+        /// <param name="title">リンクのタイトル</param>
+        /// <returns>リンク用アンカー文字列</returns>
         private static string GenerateMarkdownAnchor(string title)
         {
             // GitHub形式のアンカーを生成：小文字、空白→-、記号削除

@@ -219,6 +219,12 @@ namespace CsharpCodeAnalyzer
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="currentType"></param>
+        /// <param name="xmlCommentBuffer"></param>
         private static void TryParseMember(string line, TypeModel currentType, List<string> xmlCommentBuffer)
         {
             var methodRegex = BuildMethodRegex();
@@ -265,6 +271,10 @@ namespace CsharpCodeAnalyzer
             }
         }
 
+        /// <summary>
+        /// クラスや構造体用の正規表現インスタンスを作成
+        /// </summary>
+        /// <returns>正規表現インスタンス</returns>
         private static Regex BuildTypeRegex()
         {
             // 全修飾子を1つにまとめる
@@ -279,6 +289,10 @@ namespace CsharpCodeAnalyzer
         }
 
 
+        /// <summary>
+        /// メソッド用の正規表現インスタンスを作成
+        /// </summary>
+        /// <returns>正規表現インスタンス</returns>
         private static Regex BuildMethodRegex()
         {
             var modifiersPattern = @"(?:(?<modifier>public|protected|internal|private|static|sealed|virtual|override|abstract|async|extern)\s+)*";
@@ -291,6 +305,10 @@ namespace CsharpCodeAnalyzer
             return new Regex(methodPattern);
         }
 
+        /// <summary>
+        /// フィールド変数用の正規表現インスタンスを作成
+        /// </summary>
+        /// <returns>正規表現インスタンス</returns>
         private static Regex BuildFieldRegex()
         {
             var modifiersPattern = @"(?:(?<modifier>public|protected|internal|private|static|sealed|virtual|override|abstract|async|extern|readonly|const)\s+)*";
@@ -303,7 +321,10 @@ namespace CsharpCodeAnalyzer
             return new Regex(fieldPattern);
         }
 
-
+        /// <summary>
+        /// 変換対象から非公開情報を削除
+        /// </summary>
+        /// <param name="project">変換対象</param>
         public static void RemovePrivateMembersAndComments(ParsedProject project)
         {
             foreach (var ns in project.Namespaces.Values)

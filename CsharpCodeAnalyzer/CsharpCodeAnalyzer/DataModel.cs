@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace CsharpCodeAnalyzer
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class ParsedProject
     {
         public Dictionary<string, NamespaceModel> Namespaces { get; set; }
