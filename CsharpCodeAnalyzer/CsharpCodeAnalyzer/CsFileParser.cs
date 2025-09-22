@@ -8,8 +8,16 @@ using System.IO;
 
 namespace CsharpCodeAnalyzer
 {
+    /// <summary>
+    /// C#のソースコードの構造解析クラス
+    /// </summary>
     class CsFileParser
     {
+        /// <summary>
+        /// 対象の全ファイルを1つのプロジェクトとして情報を解析する
+        /// </summary>
+        /// <param name="filePaths">対象のファイルパスのリスト</param>
+        /// <returns>プロジェクト全体の情報管理インスタンス</returns>
         static public ParsedProject ParseFilesToProject(IEnumerable<string> filePaths)
         {
             var project = new ParsedProject()
@@ -37,8 +45,7 @@ namespace CsharpCodeAnalyzer
                     foreach (var type in ns.Types)
                     {
                         // 同じ名前・種類（class/enumなど）の型がすでに存在するか確認
-                        var existingType = existingNamespace.Types
-                            .FirstOrDefault(t => t.Name == type.Name && t.Kind == type.Kind);
+                        var existingType = existingNamespace.Types.FirstOrDefault(t => t.Name == type.Name && t.Kind == type.Kind);
 
                         // もし partial 同士ならマージ
                         if (existingType != null && type.IsPartial && existingType.IsPartial)
@@ -63,6 +70,11 @@ namespace CsharpCodeAnalyzer
             return project;
         }
 
+        /// <summary>
+        /// 対象のファイルをファイル情報管理インスタンスへ変換
+        /// </summary>
+        /// <param name="filePath">対象のファイルパス</param>
+        /// <returns>ファイル情報管理インスタンス</returns>
         public static ParsedFile ParseFile(string filePath)
         {
             var lines = File.ReadAllLines(filePath);
@@ -83,7 +95,7 @@ namespace CsharpCodeAnalyzer
 
                 if (IsXmlComment(trimmed))
                 {
-                    BufferXmlComment(trimmed, xmlCommentBuffer);
+                    BufferXmlComment(trimmed, ref xmlCommentBuffer);
                     continue;
                 }
 
@@ -98,7 +110,7 @@ namespace CsharpCodeAnalyzer
                     continue;
                 }
 
-                if (TryParseTypeDeclaration(line, xmlCommentBuffer, out var newType, ref insideEnum))
+                if (TryParseTypeDeclaration(line, ref xmlCommentBuffer, out var newType, ref insideEnum))
                 {
                     currentType = newType;
                     currentNamespace?.Types.Add(currentType);
@@ -113,28 +125,52 @@ namespace CsharpCodeAnalyzer
                         continue;
                     }
 
-                    TryParseEnumMember(line, currentType, xmlCommentBuffer);
+                    TryParseEnumMember(line, ref currentType, ref xmlCommentBuffer);
                     continue;
                 }
 
                 if (currentType != null)
                 {
-                    TryParseMember(line, currentType, xmlCommentBuffer);
+                    TryParseMember(line, ref currentType, ref xmlCommentBuffer);
                 }
             }
 
             return parsedFile;
         }
 
+        /// <summary>
+        /// 対象文字列がxml形式のコメント行かどうか確認する
+        /// </summary>
+        /// <param name="line">対象文字列</param>
+        /// <returns>xml形式であればtrue</returns>
         private static bool IsXmlComment(string line) => line.StartsWith("///");
 
-        private static void BufferXmlComment(string line, List<string> buffer)
+        /// <summary>
+        /// 対象文字列コメントをバッファへ格納する
+        /// </summary>
+        /// <param name="line">対象文字列</param>
+        /// <param name="buffer">格納先のバッファ</param>
+        private static void BufferXmlComment(string line, ref List<string> buffer)
         {
+            // コメントを想定するため先頭にあるスラッシュを削除して格納
             buffer.Add(line.Substring(3).Trim());
         }
 
+        /// <summary>
+        /// 1行コメントであるか確認する
+        /// </summary>
+        /// <param name="line">確認対象の文字列</param>
+        /// <returns>1行コメントであればtrue</returns>
         private static bool IsLineComment(string line) => line.StartsWith("//");
 
+        /// <summary>
+        /// 対象の文字列が名前空間に関する記述であるか確認する<br/>
+        /// 名前空間に関するものであれば情報格納用のインスタンスを生成
+        /// </summary>
+        /// <param name="line">対象の文字列</param>
+        /// <param name="file">ファイルの情報管理用インスタンス</param>
+        /// <param name="ns">名前空間の情報格納用インスタンス</param>
+        /// <returns>名前空間に関する記述であればtrue</returns>
         private static bool TryParseNamespace(string line, ParsedFile file, out NamespaceModel ns)
         {
             var regex = new Regex(@"^\s*namespace\s+([a-zA-Z0-9_.]+)");
@@ -155,7 +191,16 @@ namespace CsharpCodeAnalyzer
             return false;
         }
 
-        private static bool TryParseTypeDeclaration(string line, List<string> xmlCommentBuffer, out TypeModel type, ref bool isEnum)
+        /// <summary>
+        /// 対象の文字列がクラスや構造体に関する記述であるか確認する<br/>
+        /// クラスや構造体であれば情報格納用のインスタンスを生成
+        /// </summary>
+        /// <param name="line">対象文字列</param>
+        /// <param name="xmlCommentBuffer">xmlコメントを事前に格納しておくバッファ</param>
+        /// <param name="type">クラスや構造体の情報格納用インスタンス</param>
+        /// <param name="isEnum">enumに関する記述であればtrue</param>
+        /// <returns>クラスや構造体のに関する記述であればtrue</returns>
+        private static bool TryParseTypeDeclaration(string line, ref List<string> xmlCommentBuffer, out TypeModel type, ref bool isEnum)
         {
             var regex = BuildTypeRegex();
             var match = regex.Match(line);
@@ -205,7 +250,13 @@ namespace CsharpCodeAnalyzer
             return false;
         }
 
-        private static void TryParseEnumMember(string line, TypeModel currentType, List<string> xmlCommentBuffer)
+        /// <summary>
+        /// 対象の文字列がenumに関する記述であれば情報を追加する
+        /// </summary>
+        /// <param name="line">対象文字列</param>
+        /// <param name="currentType">現在のクラスや構造体の情報インスタンス</param>
+        /// <param name="xmlCommentBuffer">xmlコメントを事前に格納しておくバッファ</param>
+        private static void TryParseEnumMember(string line, ref TypeModel currentType, ref List<string> xmlCommentBuffer)
         {
             var regex = new Regex(@"^\s*([a-zA-Z0-9_]+)\s*(=\s*[^,]+)?\s*,?");
             var match = regex.Match(line);
@@ -228,12 +279,12 @@ namespace CsharpCodeAnalyzer
         }
 
         /// <summary>
-        /// 
+        /// 対象の文字列がメソッドやフィールド等に関する記述であれば情報を追加する
         /// </summary>
-        /// <param name="line"></param>
-        /// <param name="currentType"></param>
-        /// <param name="xmlCommentBuffer"></param>
-        private static void TryParseMember(string line, TypeModel currentType, List<string> xmlCommentBuffer)
+        /// <param name="line">対象文字列</param>
+        /// <param name="currentType">現在のクラスや構造体の情報インスタンス</param>
+        /// <param name="xmlCommentBuffer">xmlコメントを事前に格納しておくバッファ</param>
+        private static void TryParseMember(string line, ref TypeModel currentType, ref List<string> xmlCommentBuffer)
         {
             var methodRegex = BuildMethodRegex();
             var fieldRegex = BuildFieldRegex();
@@ -333,7 +384,7 @@ namespace CsharpCodeAnalyzer
         /// 変換対象から非公開情報を削除
         /// </summary>
         /// <param name="project">変換対象</param>
-        public static void RemovePrivateMembersAndComments(ParsedProject project)
+        public static void RemovePrivateMembersAndComments(ref ParsedProject project)
         {
             foreach (var ns in project.Namespaces.Values)
             {

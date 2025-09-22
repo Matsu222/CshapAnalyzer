@@ -38,7 +38,7 @@ namespace CsharpCodeAnalyzer
         /// <summary>
         /// 対象のフォルダを事前に作成、もしくはマークダウンを全削除
         /// </summary>
-        /// <param name="outputDirectory">対象</param>
+        /// <param name="outputDirectory">対象フォルダ</param>
         private static void PrepareOutputDirectory(string outputDirectory)
         {
             if (Directory.Exists(outputDirectory))
@@ -81,7 +81,7 @@ namespace CsharpCodeAnalyzer
         /// </summary>
         /// <param name="sb">名前空間の説明用マークダウン文字列</param>
         /// <param name="types">付与する項目の種類</param>
-        /// <param name="kind"></param>
+        /// <param name="kind">クラスや構造体の種類洗濯</param>
         /// <param name="header">対象項目の見出し</param>
         /// <param name="nsName">対象とする名前空間の名称</param>
         /// <param name="outputDirectory">出力先フォルダ</param>
@@ -116,11 +116,11 @@ namespace CsharpCodeAnalyzer
         }
 
         /// <summary>
-        /// 対象のフォルダに
+        /// 対象のフォルダにクラスや構造体の説明ファイルを作成する
         /// </summary>
-        /// <param name="type"></param>
-        /// <param name="namespaceName"></param>
-        /// <param name="outputDirectory"></param>
+        /// <param name="type">クラスや構造体の種類選択</param>
+        /// <param name="namespaceName">所属する名前空間名称</param>
+        /// <param name="outputDirectory">出力先のフォルダ</param>
         private static void WriteTypeMarkdown(TypeModel type, string namespaceName, string outputDirectory)
         {
             var sb = new StringBuilder();

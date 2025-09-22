@@ -27,7 +27,7 @@ namespace CsharpCodeAnalyzer
             var project = CsFileParser.ParseFilesToProject(files);
 
             MarkdownManager.OutputToMarkdown(project, outputDir + @"\Overall");
-            CsFileParser.RemovePrivateMembersAndComments(project);
+            CsFileParser.RemovePrivateMembersAndComments(ref project);
             MarkdownManager.OutputToMarkdown(project, outputDir + @"\ApiDoc");
         }
     }

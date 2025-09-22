@@ -10,6 +10,11 @@ namespace CsharpCodeAnalyzer
 {
     class XmlParser
     {
+        /// <summary>
+        /// xmlコメントをマークダウン形式の文字列へ変換
+        /// </summary>
+        /// <param name="xmlComment">xmlコメント文字列</param>
+        /// <returns>マークダウン形式の文字列</returns>
         public static string ToMarkdown(string xmlComment)
         {
             if (string.IsNullOrWhiteSpace(xmlComment)) return string.Empty;
@@ -54,6 +59,11 @@ namespace CsharpCodeAnalyzer
             }
         }
 
+        /// <summary>
+        /// 空白文字の削除
+        /// </summary>
+        /// <param name="text">対象文字列</param>
+        /// <returns>削除後文字列</returns>
         private static string NormalizeXmlText(string text)
         {
             return Regex.Replace(text, @"\s+", " ").Trim();
